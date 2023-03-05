@@ -13,7 +13,19 @@ function calculateLineDirection(x, y) {
     fy += force[1];
   });
 
-  return Math.atan2(fy, fx);
+  return [Math.atan2(fy, fx), Math.hypot(fy, fx)];
+}
+
+function isInsideNegativeCharge(x, y) {
+  for (let i = 0; i < charges.length; i++) {
+    let charge = charges[i];
+
+    if (charge.charge < 0 && Math.hypot(x - charge.x, y - charge.y) < 40) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 class Charge {
@@ -31,26 +43,16 @@ class Charge {
 
     document.body.appendChild(domElement);
 
-    let lastDragTime = 0;
-
     domElement.addEventListener("drag", (event) => {
-      if (lastDragTime + 500 > performance.now()) {
-        return;
-      }
-
-      lastDragTime = performance.now();
-
       if (event.x == 0 && event.y == 0) {
         return;
       }
 
-      this.x = event.x;
-      this.y = event.y;
+      this.x = Math.floor(event.x / 25) * 25; 
+      this.y = Math.floor(event.y / 25) * 25;
       
-      domElement.style.left = (event.x - 50) + "px";
-      domElement.style.top = (event.y - 50) + "px";
-
-      updateCanvas();
+      domElement.style.left = (this.x - 50) + "px";
+      domElement.style.top = (this.y - 50) + "px";
     });
 
     this.domElement = domElement;
@@ -67,19 +69,33 @@ class Charge {
     for (let n = 0; n < numLines; n++) {
       let angle = Math.PI + 2 * Math.PI * n / numLines;
 
-      let x = this.x + Math.cos(angle) * 35;
-      let y = this.y + Math.sin(angle) * 40;
+      let x = this.x + Math.cos(angle) * 10;
+      let y = this.y + Math.sin(angle) * 10;
 
       ctx.beginPath();
       ctx.moveTo(x, y);
 
-      for (let i = 0; i < 100; i++) {
-        let dir = calculateLineDirection(x, y);
+      for (let i = 0; i < 500; i++) {
+        let [dir, magnitude] = calculateLineDirection(x, y);
+
+        if (i % 10 == 0) {
+          ctx.beginPath();
+          ctx.moveTo(x + Math.cos(dir - Math.PI / 2) * 10, y + Math.sin(dir - Math.PI / 2) * 10);
+          ctx.lineTo(x + Math.cos(dir) * 10, y + Math.sin(dir) * 10);
+          ctx.lineTo(x + Math.cos(dir + Math.PI / 2) * 10, y + Math.sin(dir + Math.PI / 2) * 10);
+          ctx.lineTo(x, y);
+          ctx.fill();
+        }
+
         x += Math.cos(dir) * 10;
         y += Math.sin(dir) * 10;
 
         ctx.lineTo(x, y);
         ctx.stroke();
+
+        if (isInsideNegativeCharge(x, y)) {
+          break;
+        }
       }
     }
   }
@@ -103,8 +119,55 @@ canvas.height = window.innerHeight;
 window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  updateCanvas();
 });
 
-const charges = [new Charge(-3, 300, 300), new Charge(-3, 600, 300), new Charge(3, 800, 300)];
-updateCanvas();
+//const charges = [new Charge(-3, 300, 300), new Charge(-3, 300, 300), new Charge(-3, 300, 300), new Charge(-3, 300, 300), new Charge(-3, 300, 300), new Charge(3, 300, 300), new Charge(3, 300, 300), new Charge(3, 300, 300), new Charge(3, 300, 300), new Charge(3, 300, 300)];
+//const charges = [new Charge(-3, 300, 300), new Charge(3, 300, 300)];
+//const charges = [new Charge(3, 300, 300), new Charge(3, 300, 300), new Charge(3, 300, 300), new Charge(3, 300, 300)];
+const charges = [];
+
+for (let i = 0; i < 5; i++) {
+  let charge =  0;
+  if (i < 2) {
+    charge = randint(-5, 0);
+  } else {
+    charge = randint(1, 6);
+  }
+
+  let x = 0;
+  let y = 0;
+
+  while (true) {
+    x = randint(100, screen.width - 100);
+    y = randint(100, screen.height - 100);
+
+    let flag = false;
+
+    for (let i = 0; i < charges.length; i++) {
+      let charge = charges[i];
+
+      if (Math.hypot(charge.x - x, charge.y - y) < 150) {
+        flag = true;
+        break;
+      }
+    }
+
+    if (!flag) {
+      break;
+    }
+  }
+
+  charges.push(new Charge(charge, x, y));
+}
+
+function randint(min, max) {
+  return min + Math.floor(Math.random() * (max - min));
+}
+
+function animate() {
+  updateCanvas();
+
+  requestAnimationFrame(animate);
+}
+
+animate();
