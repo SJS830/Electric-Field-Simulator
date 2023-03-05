@@ -38,7 +38,7 @@ function randint(min, max) {
 const charges = [];
 const testCharges = [];
 
-//initialize test charges
+//initialize random charges
 for (let i = 0; i < 5; i++) {
   let charge =  0;
   if (i < 2) {
