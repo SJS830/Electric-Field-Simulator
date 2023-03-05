@@ -1,8 +1,7 @@
 .charge {
   height: 100px;
   width: 100px;
-  background-color: red;
-  color: blue;
+  color: white;
 
   border-radius: 50%;
   position: absolute;
@@ -11,6 +10,14 @@
   align-items: center;
 
   font-size: 50px;
+}
+
+.negatively_charged {
+  background-color: blue;
+}
+
+.positively_charged {
+  background-color: red;
 }
 
 .canvas {

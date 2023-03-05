@@ -36,6 +36,7 @@ class Charge {
 
     let domElement = document.createElement("span");
     domElement.classList.add("charge");
+    domElement.classList.add((charge < 0) ? "negatively_charged" : "positively_charged");
     domElement.style.left = (x - 50) + "px";
     domElement.style.top = (y - 50) + "px";
     domElement.innerHTML = "<p>" + charge + "</p>";
@@ -101,8 +102,36 @@ class Charge {
   }
 }
 
-function updateCanvas() {
-  let t = performance.now();
+class TestCharge {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+
+    this.velocity_x = 0;
+    this.velocity_y = 0;
+  }
+
+  step() {
+    let [dir, magnitude] = calculateLineDirection(this.x, this.y);
+
+    this.velocity_x += Math.cos(dir) * magnitude * 5;
+    this.velocity_y += Math.sin(dir) * magnitude * 5;
+
+    this.x += this.velocity_x;
+    this.y += this.velocity_y;
+  }
+
+  drawOnCanvas() {
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 10, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.fillStyle = "black";
+  }
+}
+
+function update() {
+  //let t = performance.now();
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -110,7 +139,12 @@ function updateCanvas() {
     charge.drawFieldLines();
   });
 
-  console.log(performance.now() - t);
+  testCharges.forEach(testCharge => {
+    testCharge.step();
+    testCharge.drawOnCanvas();
+  });
+
+  //console.log(performance.now() - t);
 }
 
 canvas.width = window.innerWidth;
@@ -121,10 +155,8 @@ window.addEventListener("resize", () => {
   canvas.height = window.innerHeight;
 });
 
-//const charges = [new Charge(-3, 300, 300), new Charge(-3, 300, 300), new Charge(-3, 300, 300), new Charge(-3, 300, 300), new Charge(-3, 300, 300), new Charge(3, 300, 300), new Charge(3, 300, 300), new Charge(3, 300, 300), new Charge(3, 300, 300), new Charge(3, 300, 300)];
-//const charges = [new Charge(-3, 300, 300), new Charge(3, 300, 300)];
-//const charges = [new Charge(3, 300, 300), new Charge(3, 300, 300), new Charge(3, 300, 300), new Charge(3, 300, 300)];
 const charges = [];
+const testCharges = [];
 
 for (let i = 0; i < 5; i++) {
   let charge =  0;
@@ -165,9 +197,13 @@ function randint(min, max) {
 }
 
 function animate() {
-  updateCanvas();
+  update();
 
   requestAnimationFrame(animate);
 }
 
 animate();
+
+document.addEventListener("click", (event) => {
+  testCharges.push(new TestCharge(event.x, event.y));
+});
