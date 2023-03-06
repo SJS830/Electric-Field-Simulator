@@ -11,6 +11,10 @@ function calculateLineDirection(x, y) {
   let fy = 0;
 
   charges.forEach(charge => {
+    if (charge.disabled) {
+      return;
+    }
+
     let force = charge.calculateForce(x, y);
     fx += force[0];
     fy += force[1];
@@ -23,13 +27,34 @@ function isInsideNegativeCharge(x, y) {
   for (let i = 0; i < charges.length; i++) {
     let charge = charges[i];
 
+    if (charge.disabled) {
+      continue;
+    }
+
     if (charge.charge < 0 && Math.hypot(x - charge.x, y - charge.y) < 40) {
-      return true;
+      return charge;
     }
   }
 
   return false;
 }
+
+function isInsidePositiveCharge(x, y) {
+  for (let i = 0; i < charges.length; i++) {
+    let charge = charges[i];
+
+    if (charge.disabled) {
+      continue;
+    }
+
+    if (charge.charge > 0 && Math.hypot(x - charge.x, y - charge.y) < 40) {
+      return charge;
+    }
+  }
+
+  return false;
+}
+
 
 function randint(min, max) {
   return min + Math.floor(Math.random() * (max - min));
@@ -77,7 +102,25 @@ function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   charges.forEach(charge => {
-    charge.drawFieldLines();
+    if (charge.disabled) {
+      return;
+    }
+
+    if (charge.charge < 0) {
+      charge.linesGoingIn = [];
+    } else {
+      charge.drawFieldLines();
+    }
+  });
+
+  charges.forEach(charge => {
+    if (charge.disabled) {
+      return;
+    }
+
+    if (charge.charge < 0) {
+      charge.drawFieldLines();
+    }
   });
 
   testCharges.forEach(testCharge => {
@@ -90,8 +133,21 @@ function animate() {
 
 animate();
 
+let doublePress = false;
 window.addEventListener("click", (event) => {
-  testCharges.push(new TestCharge(event.x, event.y));
+  setTimeout(() => {
+    if (doublePress == true) {
+      doublePress = false;
+      return;
+    }
+
+    testCharges.push(new TestCharge(event.x, event.y));
+  }, 150);
+});
+
+window.addEventListener("dblclick", (event) => {
+  charges.push(new Charge(1, event.x, event.y));
+  doublePress = true;
 });
 
 window.addEventListener("resize", () => {

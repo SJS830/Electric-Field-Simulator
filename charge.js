@@ -3,27 +3,52 @@ class Charge {
     this.charge = charge;
     this.x = x;
     this.y = y;
+    this.disabled = false;
+    this.linesGoingIn = [];
 
     let domElement = document.createElement("span");
     domElement.classList.add("charge");
     domElement.classList.add((charge < 0) ? "negatively_charged" : "positively_charged");
     domElement.style.left = (x - 50) + "px";
     domElement.style.top = (y - 50) + "px";
-    domElement.innerHTML = "<p>" + charge + "</p>";
     domElement.draggable = true;
+
+    let chargeValue = document.createElement("input");
+    chargeValue.classList.add("charge_value");
+    chargeValue.type = "number";
+    chargeValue.value = charge;
+    domElement.appendChild(chargeValue);
 
     document.body.appendChild(domElement);
 
-    domElement.addEventListener("drag", (event) => {
+    chargeValue.addEventListener("change", () => {
+      this.charge = chargeValue.value;
+
+      if (this.charge > 0) {
+        domElement.classList.remove("negatively_charged");
+        domElement.classList.add("positively_charged");
+      } else if (this.charge < 0) {
+        domElement.classList.add("negatively_charged");
+        domElement.classList.remove("positively_charged");
+      }
+    });
+
+    domElement.addEventListener("drag", () => {
       if (event.x == 0 && event.y == 0) {
         return;
       }
 
-      this.x = Math.floor(event.x / 25) * 25; 
+      this.x = Math.floor(event.x / 25) * 25;
       this.y = Math.floor(event.y / 25) * 25;
-      
+
       domElement.style.left = (this.x - 50) + "px";
       domElement.style.top = (this.y - 50) + "px";
+    });
+
+    domElement.addEventListener("dblclick", (event) => {
+      this.disabled = true;
+      domElement.remove();
+      event.stopPropagation();
     });
 
     //remove ghost image
@@ -32,7 +57,7 @@ class Charge {
       img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
       event.dataTransfer.setDragImage(img, 0, 0);
     });
-  
+
 
     this.domElement = domElement;
   }
@@ -44,6 +69,10 @@ class Charge {
 
   drawFieldLines() {
     let numLines = Math.abs(this.charge * 4);
+
+    if (this.charge < 0) {
+      numLines -= this.linesGoingIn.length;
+    }
 
     for (let n = 0; n < numLines; n++) {
       let angle = Math.PI + 2 * Math.PI * n / numLines;
@@ -67,13 +96,20 @@ class Charge {
           ctx.fill();
         }
 
-        x += Math.cos(dir) * 10;
-        y += Math.sin(dir) * 10;
+        if (this.charge < 0) {
+          dir += Math.PI;
+        }
+
+        x += Math.cos(dir) * 10 * direction;
+        y += Math.sin(dir) * 10 * direction;
 
         ctx.lineTo(x, y);
         ctx.stroke();
 
-        if (isInsideNegativeCharge(x, y)) {
+        if (this.charge > 0 && isInsideNegativeCharge(x, y)) {
+          isInsideNegativeCharge(x, y).linesGoingIn.push(Math.atan2(y - charge.y, x - charge.x));
+          break;
+        } else if (this.charge < 0 && isInsidePositiveCharge(x, y)) {
           break;
         }
       }

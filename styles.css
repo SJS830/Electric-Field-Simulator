@@ -12,6 +12,14 @@
   font-size: 50px;
 }
 
+.charge_value {
+  width: 50px;
+  font-size: 30px;
+  background-color: transparent;
+  border: 1px solid black;
+  color: white;
+}
+
 .negatively_charged {
   background-color: blue;
 }
