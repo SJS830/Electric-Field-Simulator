@@ -55,11 +55,6 @@ function isInsidePositiveCharge(x, y) {
   return false;
 }
 
-
-function randint(min, max) {
-  return min + Math.floor(Math.random() * (max - min));
-}
-
 const charges = [];
 const testCharges = [];
 
@@ -108,7 +103,16 @@ function animate() {
 
     if (charge.charge < 0) {
       charge.linesGoingIn = [];
-    } else {
+    }
+  });
+
+
+  charges.forEach(charge => {
+    if (charge.disabled) {
+      return;
+    }
+
+    if (charge.charge > 0) {
       charge.drawFieldLines();
     }
   });
@@ -134,7 +138,7 @@ function animate() {
 animate();
 
 let doublePress = false;
-window.addEventListener("click", (event) => {
+canvas.addEventListener("click", (event) => {
   setTimeout(() => {
     if (doublePress == true) {
       doublePress = false;
@@ -145,12 +149,12 @@ window.addEventListener("click", (event) => {
   }, 150);
 });
 
-window.addEventListener("dblclick", (event) => {
+canvas.addEventListener("dblclick", (event) => {
   charges.push(new Charge(1, event.x, event.y));
   doublePress = true;
 });
 
-window.addEventListener("resize", () => {
+window.addEventListener("resize", (event) => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 });

@@ -49,3 +49,7 @@ function maximizeGaps(radian_ins, num_insertions) {
 
   return angles;
 }
+
+function randint(min, max) {
+  return min + Math.floor(Math.random() * (max - min));
+}

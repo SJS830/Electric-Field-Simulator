@@ -33,13 +33,13 @@ class Charge {
       }
     });
 
-    domElement.addEventListener("drag", () => {
+    domElement.addEventListener("drag", (event) => {
       if (event.x == 0 && event.y == 0) {
         return;
       }
 
-      this.x = Math.floor(event.x / 25) * 25;
-      this.y = Math.floor(event.y / 25) * 25;
+      this.x = Math.floor(event.x / 10) * 10;
+      this.y = Math.floor(event.y / 10) * 10;
 
       domElement.style.left = (this.x - 50) + "px";
       domElement.style.top = (this.y - 50) + "px";
@@ -69,13 +69,28 @@ class Charge {
 
   drawFieldLines() {
     let numLines = Math.abs(this.charge * 4);
+    let angles = [];
 
     if (this.charge < 0) {
       numLines -= this.linesGoingIn.length;
+      angles = maximizeGaps(this.linesGoingIn, numLines);
+    } else {
+      for (let n = 0; n < numLines; n++) {
+        angles.push(Math.PI + 2 * Math.PI * n / numLines);
+      }
     }
 
     for (let n = 0; n < numLines; n++) {
-      let angle = Math.PI + 2 * Math.PI * n / numLines;
+      let angle = angles[n];
+
+      if (this.charge < 0) {
+        let x = this.x + Math.cos(angle) * 100;
+        let y = this.y + Math.sin(angle) * 100;
+        
+        ctx.beginPath();
+        ctx.arc(x, y, 10, 0, 2 * Math.PI);
+        ctx.fill();
+      }
 
       let x = this.x + Math.cos(angle) * 10;
       let y = this.y + Math.sin(angle) * 10;
@@ -100,14 +115,16 @@ class Charge {
           dir += Math.PI;
         }
 
-        x += Math.cos(dir) * 10 * direction;
-        y += Math.sin(dir) * 10 * direction;
-
+        x += Math.cos(dir) * 10;
+        y += Math.sin(dir) * 10;
+        
         ctx.lineTo(x, y);
         ctx.stroke();
 
         if (this.charge > 0 && isInsideNegativeCharge(x, y)) {
-          isInsideNegativeCharge(x, y).linesGoingIn.push(Math.atan2(y - charge.y, x - charge.x));
+          let charge = isInsideNegativeCharge(x, y);
+          let angle = Math.atan2(charge.y - y, charge.x - x) + Math.PI;
+          charge.linesGoingIn.push(((angle % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI));
           break;
         } else if (this.charge < 0 && isInsidePositiveCharge(x, y)) {
           break;
