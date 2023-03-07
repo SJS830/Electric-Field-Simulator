@@ -28,6 +28,10 @@
   background-color: red;
 }
 
+.neutrally_charged {
+  background-color: lightgrey;
+}
+
 .canvas {
   position: absolute;
   display: block;

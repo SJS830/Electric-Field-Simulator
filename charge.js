@@ -25,11 +25,17 @@ class Charge {
       this.charge = chargeValue.value;
 
       if (this.charge > 0) {
-        domElement.classList.remove("negatively_charged");
         domElement.classList.add("positively_charged");
+        domElement.classList.remove("negatively_charged");
+        domElement.classList.remove("neutrally_charged");
       } else if (this.charge < 0) {
         domElement.classList.add("negatively_charged");
         domElement.classList.remove("positively_charged");
+        domElement.classList.remove("neutrally_charged");
+      } else {
+        domElement.classList.add("neutrally_charged");
+        domElement.classList.remove("positively_charged");
+        domElement.classList.remove("negatively_charged");
       }
     });
 
@@ -46,6 +52,11 @@ class Charge {
     });
 
     domElement.addEventListener("dblclick", (event) => {
+      //dont activate on when user clicks the charge changer
+      if (event.target.localName == "input") {
+        return;
+      }
+
       this.disabled = true;
       domElement.remove();
       event.stopPropagation();
@@ -87,7 +98,7 @@ class Charge {
       ctx.beginPath();
       ctx.moveTo(x, y);
 
-      for (let i = 0; i < 1500; i++) {
+      for (let i = 0; i < 500; i++) {
         let [dir, magnitude] = calculateLineDirection(x, y);
 
         //arrow
@@ -105,7 +116,7 @@ class Charge {
 
         x += Math.cos(dir) * 10;
         y += Math.sin(dir) * 10;
-        
+
         ctx.lineTo(x, y);
         ctx.stroke();
 
@@ -128,7 +139,7 @@ class Charge {
       ctx.beginPath();
       ctx.moveTo(x, y);
 
-      for (let i = 0; i < 1500; i++) {
+      for (let i = 0; i < 500; i++) {
         let [dir, magnitude] = calculateLineDirection(x, y);
 
         //arrow
@@ -143,7 +154,7 @@ class Charge {
 
         x += Math.cos(dir) * 10;
         y += Math.sin(dir) * 10;
-        
+
         ctx.lineTo(x, y);
         ctx.stroke();
 
