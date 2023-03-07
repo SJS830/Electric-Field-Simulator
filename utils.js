@@ -1,6 +1,6 @@
 //this function takes in an array of the angles of fixed "walls",
 //and returns an array of num_insertions angles which maximizes
-//the amount of space inbetween each angle and the walls
+//the amount of space between each angle and the walls
 function maximizeGaps(radian_ins, num_insertions) {
   radian_ins.sort();
 
