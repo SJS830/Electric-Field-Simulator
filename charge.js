@@ -7,14 +7,13 @@ class Charge {
     this.linesGoingIn = [];
 
     let domElement = document.createElement("span");
-    domElement.classList.add("charge");
-    domElement.classList.add((charge < 0) ? "negatively_charged" : "positively_charged");
+    domElement.className = "charge " + ["negatively_charged", "neutrally_charged", "positively_charged"][Math.sign(this.charge) + 1];
     domElement.style.left = (x - 50) + "px";
     domElement.style.top = (y - 50) + "px";
     domElement.draggable = true;
 
     let chargeValue = document.createElement("input");
-    chargeValue.classList.add("charge_value");
+    chargeValue.className = "charge_value";
     chargeValue.type = "number";
     chargeValue.value = charge;
     domElement.appendChild(chargeValue);
@@ -24,19 +23,7 @@ class Charge {
     chargeValue.addEventListener("change", () => {
       this.charge = chargeValue.value;
 
-      if (this.charge > 0) {
-        domElement.classList.add("positively_charged");
-        domElement.classList.remove("negatively_charged");
-        domElement.classList.remove("neutrally_charged");
-      } else if (this.charge < 0) {
-        domElement.classList.add("negatively_charged");
-        domElement.classList.remove("positively_charged");
-        domElement.classList.remove("neutrally_charged");
-      } else {
-        domElement.classList.add("neutrally_charged");
-        domElement.classList.remove("positively_charged");
-        domElement.classList.remove("negatively_charged");
-      }
+      domElement.className = "charge " + ["negatively_charged", "neutrally_charged", "positively_charged"][Math.sign(this.charge) + 1];
     });
 
     domElement.addEventListener("drag", (event) => {
